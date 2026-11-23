@@ -1,11 +1,23 @@
 # A Deterministic Parallel Simulator of a Coherent Multi-SM GPU
 Team Members: Devika Manohar (dmanohar), Barbara Zhuo (jiayizhu)
 
-## Project Summary: 
+## Project Summary
 We plan to build a simulator of a multi-SM GPU’s memory system (SMs, crossbar, L2 slices, DRAM) and parallelize the simulator itself. Threads will simulate independently for windows as long as the interconnect latency, then synchronize, so the results exactly match a sequential version. We will run it with C++ threads (OpenMP) on the 8-core GHC machines and the 128-core PSC Bridges-2 nodes.
 
-## Design Overview: 
+## Current Design
+- Sequential engine: coordinates the simulated hardware components and advances them through cycles using ticks.
+  - SM has warps and an L1 cache, input trace gives each warp an instruction list
+  - SM tick advances the SM instance forward one simulated cycle, such as performing L1 accesses and compute operations. Each tick it can send at most one memory request through the crossbar.
+  - SMs and L2 cache slices communicate through crossbar messages that take more cycles to pass back and forth. 
+- These components/modules will be directly used in the parallel engine when they are initialized by different OpenMP threads.
 
+## Goals and Deliverables
+
+- Test sequential simulator on large traces so we can confidently use it as the correctness baseline.
+- Build a lockstep parallel engine with results that match the sequential engine.
+- Create small traces to check specific behaviors such as fences, atomics, and multiple SMs accessing shared lines.
+- Measure speedup for parallel engine compared to the baseline. Add measurements for time spent simulating, waiting at barriers, and passing messages.
+- If we get lockstep version to be correct, try upgrading it to conservative lookahead. 
 
 ## Project Timeline
 
